@@ -48,6 +48,12 @@ export interface MotorcycleConfig {
   modelYaw?: number;
   /** Key into the built-in procedural model registry */
   builtinModel?: string;
+  /**
+   * Set false for GLBs with properly-authored PBR materials —
+   * sanitizeGlbMaterials() is a fix-up for broken SketchUp exports and would
+   * overwrite good metalness/roughness values. Default true.
+   */
+  sanitizeMaterials?: boolean;
   /** Fixed (non-customizable) material fixes, keyed by GLB material name */
   materialOverrides?: Record<string, MaterialOverride>;
   parts: PartConfig[];

@@ -114,6 +114,7 @@ export function SceneCanvas() {
               <MotorcycleModel
                 modelPath={motorcycle.modelPath}
                 modelYaw={motorcycle.modelYaw}
+                sanitize={motorcycle.sanitizeMaterials !== false}
               />
             ) : BuiltinModel ? (
               <BuiltinModel />

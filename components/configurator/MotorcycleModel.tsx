@@ -20,6 +20,8 @@ interface MotorcycleModelProps {
   targetLength?: number;
   /** Extra yaw (radians) so the bike faces +X, per model */
   modelYaw?: number;
+  /** Skip the SketchUp-export material fix-up for properly-authored GLBs */
+  sanitize?: boolean;
 }
 
 /**
@@ -66,6 +68,7 @@ export function MotorcycleModel({
   modelPath,
   targetLength = 1.95,
   modelYaw = 0,
+  sanitize = true,
 }: MotorcycleModelProps) {
   const { scene } = useGLTF(modelPath);
   const meshMapRef = useRef<Map<string, THREE.Mesh> | null>(null);
@@ -76,10 +79,10 @@ export function MotorcycleModel({
 
   const normalized = useMemo(() => {
     normalizeScene(scene, targetLength, modelYaw);
-    sanitizeGlbMaterials(scene);
+    if (sanitize) sanitizeGlbMaterials(scene);
     preserveMaterialNames(scene);
     return scene;
-  }, [scene, targetLength, modelYaw]);
+  }, [scene, targetLength, modelYaw, sanitize]);
 
   useEffect(() => {
     meshMapRef.current = buildMeshMap(normalized);
@@ -90,6 +93,7 @@ export function MotorcycleModel({
 
     if (process.env.NODE_ENV === "development") {
       logSceneMeshNames(normalized);
+      (window as unknown as { __scene?: THREE.Object3D }).__scene = normalized;
     }
   }, [normalized, currentMotorcycle, setModelLoaded]);
 

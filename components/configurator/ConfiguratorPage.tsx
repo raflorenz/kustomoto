@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import Link from "next/link";
 import { useConfiguratorStore } from "@/stores/configurator-store";
-import { hondaAdv150 } from "@/data/motorcycles/honda-adv-150";
+import { MOTORCYCLES } from "@/data/motorcycles";
 import { SceneCanvas } from "./SceneCanvas";
 import { ControlPanel } from "./ControlPanel";
 
@@ -12,7 +12,7 @@ export function ConfiguratorPage() {
   const motorcycle = useConfiguratorStore((s) => s.currentMotorcycle);
 
   useEffect(() => {
-    setMotorcycle(hondaAdv150);
+    setMotorcycle(MOTORCYCLES[0]);
   }, [setMotorcycle]);
 
   return (
@@ -36,6 +36,23 @@ export function ConfiguratorPage() {
             </h1>
             <p className="text-xs text-gray-500">Fairing Configurator</p>
           </div>
+        </div>
+
+        {/* Motorcycle picker */}
+        <div className="pointer-events-none absolute left-1/2 top-4 flex -translate-x-1/2 gap-1.5">
+          {MOTORCYCLES.map((bike) => (
+            <button
+              key={bike.id}
+              onClick={() => setMotorcycle(bike)}
+              className={`pointer-events-auto rounded-full px-3.5 py-1.5 text-xs font-medium shadow-sm ring-1 transition-colors ${
+                motorcycle?.id === bike.id
+                  ? "bg-gray-900 text-white ring-gray-900"
+                  : "bg-white/90 text-gray-600 ring-gray-200 hover:bg-white"
+              }`}
+            >
+              {bike.name}
+            </button>
+          ))}
         </div>
       </div>
 
