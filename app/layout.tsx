@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "LetsCustomize",
+  title: "Kustomoto",
   description: "Customize your motorcycle in 3D",
 };
 

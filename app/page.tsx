@@ -5,7 +5,7 @@ export default function Home() {
     <div className="flex flex-1 flex-col items-center justify-center bg-zinc-50 font-sans dark:bg-black">
       <main className="flex flex-col items-center gap-8 text-center">
         <h1 className="text-4xl font-bold tracking-tight text-gray-900 dark:text-white">
-          LetsCustomize
+          Kustomoto
         </h1>
         <p className="max-w-md text-lg text-gray-600 dark:text-gray-400">
           Customize your motorcycle in 3D. Choose colors, materials, and make it

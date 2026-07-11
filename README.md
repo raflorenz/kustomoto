@@ -1,36 +1,42 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Kustomoto
+
+A 3D motorcycle configurator. Pick a bike, pick a part, then choose a color and paint finish — rendered live in the browser.
+
+Built with [Next.js](https://nextjs.org) (App Router), React 19, [react-three-fiber](https://docs.pmnd.rs/react-three-fiber), Tailwind CSS v4, and Zustand.
+
+## Bikes
+
+- Honda ADV 150
+- Yamaha NMAX
+- Yamaha Aerox
+- Honda PCX
+
+Each bike is a processed GLB with its bodywork split into independently paintable zones. Paint finishes (gloss, matte, metallic, satin, chrome) map to PBR material values.
 
 ## Getting Started
 
-First, run the development server:
-
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) and hit **Start Customizing**.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Other scripts:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run build   # production build
+npm start       # serve the production build
+npm run lint    # ESLint
+```
 
-## Learn More
+See [CLAUDE.md](CLAUDE.md) for the model-processing pipeline (GLB analysis and splitting scripts) and how to add a new motorcycle.
 
-To learn more about Next.js, take a look at the following resources:
+## Model Credits
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- "HONDA ADV 150" by Arq. Vini Boschetti (SketchUp 3D Warehouse, General Model License)
+- "Nmax Motorbike" by muhecsad (Sketchfab, CC-BY-NC-SA-4.0) and "Yamaha NMAX" by Ozkar O. (3D Warehouse)
+- "Yamaha Aerox Modified 155" by Pojan (Sketchfab, CC-BY-4.0) and "Yamaha Aerox 155cc" by ItoRauf (3D Warehouse)
+- "Honda PCX" by DevanirGrau (Sketchfab, CC-BY-4.0)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Motorcycle designs and names are the IP of their respective manufacturers; this project is a demo/portfolio piece.

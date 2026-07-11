@@ -18,7 +18,7 @@ Note: on this machine the native SWC binary fails to load and Next falls back to
 
 ## Architecture
 
-This is a Next.js 16 app using the App Router with TypeScript, React 19, and Tailwind CSS v4. It is a 3D motorcycle configurator ("LetsCustomize"): users pick a part, then a color and a paint finish, rendered live with react-three-fiber.
+This is a Next.js 16 app using the App Router with TypeScript, React 19, and Tailwind CSS v4. It is a 3D motorcycle configurator ("Kustomoto"): users pick a part, then a color and a paint finish, rendered live with react-three-fiber.
 
 - **App Router:** All routes live in `app/` — uses `layout.tsx` / `page.tsx` conventions
 - **Styling:** Tailwind CSS v4 via `@tailwindcss/postcss`; theme tokens defined in `app/globals.css` using `@theme inline`
