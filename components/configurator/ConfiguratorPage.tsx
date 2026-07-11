@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect } from "react";
-import Link from "next/link";
 import { useConfiguratorStore } from "@/stores/configurator-store";
 import { MOTORCYCLES } from "@/data/motorcycles";
 import { SceneCanvas } from "./SceneCanvas";
@@ -23,13 +22,6 @@ export function ConfiguratorPage() {
 
         {/* Header overlay */}
         <div className="pointer-events-none absolute left-5 top-4 flex items-center gap-3">
-          <Link
-            href="/"
-            className="pointer-events-auto flex h-8 w-8 items-center justify-center rounded-lg bg-white/90 text-gray-600 shadow-sm ring-1 ring-gray-200 transition-colors hover:bg-white"
-            aria-label="Back to home"
-          >
-            ←
-          </Link>
           <div>
             <h1 className="text-sm font-bold text-gray-900">
               {motorcycle?.name ?? "Loading..."}

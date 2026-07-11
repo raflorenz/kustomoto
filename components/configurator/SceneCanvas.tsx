@@ -19,6 +19,7 @@ import { ErrorBoundary } from "./ErrorBoundary";
 const MIN_DISTANCE = 1.4;
 const MAX_DISTANCE = 6;
 const TARGET = new THREE.Vector3(0, 0.55, 0);
+const CAMERA_POSITION: [number, number, number] = [2.1, 1.0, 2.3];
 
 export function SceneCanvas() {
   const motorcycle = useConfiguratorStore((s) => s.currentMotorcycle);
@@ -38,7 +39,15 @@ export function SceneCanvas() {
     controls.update();
   };
 
-  const resetView = () => controlsRef.current?.reset();
+  // controls.reset() restores the state saved at construction, before the
+  // target prop was applied — restore the actual initial view instead.
+  const resetView = () => {
+    const controls = controlsRef.current;
+    if (!controls) return;
+    controls.object.position.set(...CAMERA_POSITION);
+    controls.target.copy(TARGET);
+    controls.update();
+  };
 
   const BuiltinModel = motorcycle?.builtinModel
     ? BUILTIN_MODELS[motorcycle.builtinModel]
@@ -49,7 +58,7 @@ export function SceneCanvas() {
   return (
     <>
       <Canvas
-        camera={{ position: [2.1, 1.0, 2.3], fov: 40 }}
+        camera={{ position: CAMERA_POSITION, fov: 40 }}
         dpr={[1, 2]}
         gl={{ antialias: true }}
       >

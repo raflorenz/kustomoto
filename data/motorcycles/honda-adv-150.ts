@@ -2,7 +2,7 @@ import type { MotorcycleConfig } from "@/types/configurator";
 
 export const hondaAdv150: MotorcycleConfig = {
   id: "honda-adv-150",
-  name: "Honda ADV 150",
+  name: "Honda ADV",
   modelPath: "/models/honda-adv-150.glb",
   modelYaw: Math.PI,
   // Fixed materials for the GLB (SketchUp export ships flat 0.5/0.5 PBR values)

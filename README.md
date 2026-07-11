@@ -6,7 +6,7 @@ Built with [Next.js](https://nextjs.org) (App Router), React 19, [react-three-fi
 
 ## Bikes
 
-- Honda ADV 150
+- Honda ADV
 - Yamaha NMAX
 - Yamaha Aerox
 - Honda PCX
