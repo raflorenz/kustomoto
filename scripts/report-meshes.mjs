@@ -1,9 +1,14 @@
 // Report every mesh's world-space bbox and material — for scoping a new GLB.
 // Usage: node scripts/report-meshes.mjs <input.glb>
 import { NodeIO } from "@gltf-transform/core";
+import { ALL_EXTENSIONS } from "@gltf-transform/extensions";
+import { MeshoptDecoder } from "meshoptimizer";
 
 const [input] = process.argv.slice(2);
-const io = new NodeIO();
+await MeshoptDecoder.ready;
+const io = new NodeIO()
+  .registerExtensions(ALL_EXTENSIONS)
+  .registerDependencies({ "meshopt.decoder": MeshoptDecoder });
 const doc = await io.read(input);
 
 const scene = doc.getRoot().getDefaultScene() || doc.getRoot().listScenes()[0];

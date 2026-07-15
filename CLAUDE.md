@@ -13,6 +13,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **List every mesh's bbox/material in a GLB:** `node scripts/report-meshes.mjs <input.glb>`
 - **Identify paint zones visually:** `node scripts/rainbow-debug.mjs <in.glb> <out.glb> [topN]` — recolors the N biggest materials with distinct colors and prints the legend; view the output in the app
 - **Split a source GLB into paint zones:** `node scripts/split-adv150.mjs`, `split-nmax.mjs` / `split-aerox.mjs` (fallback models), `split-nmax-v2.mjs` / `split-aerox-v2.mjs` / `split-pcx.mjs` (Sketchfab primaries; aerox-v2 and pcx also decimate via meshoptimizer) — `node scripts/split-<id>.mjs <source.gltf|glb> public/models/<id>.glb`
+- **Meshopt-compress the shipped GLBs:** `node scripts/compress-models.mjs [file.glb ...]` (default: all of `public/models/`) — run after any split script; idempotent, lossless on top of `quantize()` (typically halves the file). drei's `useGLTF` wires the decoder automatically; the analysis scripts above read compressed files fine.
 
 Note: on this machine the native SWC binary fails to load and Next falls back to WASM, so the first compile of each page is slow (up to ~1 min). Subsequent compiles are fast.
 
@@ -100,6 +101,8 @@ Any GLB is auto-normalized on load — do not hand-scale new models:
 
 If the GLB fails to load, `SceneCanvas` falls back to a procedural model looked up by motorcycle id in `components/configurator/models/index.ts` (`BUILTIN_MODELS`). The procedural ADV 150 (`models/Adv150Model.tsx`) is kept for exactly this purpose.
 
+Loading performance (July 2026): all shipped GLBs are meshopt-compressed (`EXT_meshopt_compression`, see `scripts/compress-models.mjs`; drei's `useGLTF` supplies the decoder). `app/page.tsx` preloads the default bike's GLB from the initial HTML (`react-dom` `preload`, `crossOrigin: "anonymous"` to match three's fetch), `ConfiguratorPage` loads `SceneCanvas` via `next/dynamic` (`ssr: false`) so the three.js chunk downloads in parallel with the GLB instead of blocking the shell, `SceneCanvas` idle-prefetches the other bikes' GLBs once the current model is on screen, and `next.config.ts` sets a 1-day Cache-Control on `/models/*`.
+
 ### Split-script workflow (scripts/)
 
 The ADV 150 source GLB has ALL red bodywork as one primitive (material `[Color A07]`). To make zones independently paintable:
@@ -126,7 +129,7 @@ The 23 MB source GLB is not in the repo (only the processed 7.6 MB `public/model
 2. **Inspect it.** Run `report-meshes.mjs` (every mesh's bbox + material) and `analyze-paint.mjs` (connected components of a candidate paint material, world coords) to find which material is the paint and whether meshes are already spatial zones. Watch for diorama props (floors, walls, posters) that must be deleted. Drop the processed file in `public/models/<id>.glb`.
 3. **If the paint is one big mesh,** copy/adapt `split-adv150.mjs`: analyze components first, split along real gaps with whole triangles, clip with a plane only where panels are fused.
 4. **Create `data/motorcycles/<id>.ts`:** parts with `materialNames`, `materialOverrides` for the fixed materials (dark plastics / silver metal / glass), `modelYaw` if it faces backwards, color presets.
-5. **Optimize:** quantize via the split script's transform chain (or `gltf-transform optimize --palette false --compress quantize`). Target well under 10 MB.
+5. **Optimize:** quantize via the split script's transform chain (or `gltf-transform optimize --palette false --compress quantize`), then run `node scripts/compress-models.mjs public/models/<id>.glb` to meshopt-compress it. Target well under 5 MB compressed.
 6. **Verify in the browser** (preview tools): default view faces +X, each part recolors independently, no washed-out gray materials, tires/seat read dark.
 7. Optionally register a procedural fallback in `BUILTIN_MODELS` keyed by the motorcycle id.
 

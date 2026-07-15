@@ -3,11 +3,17 @@
 // the app. Not part of the production pipeline.
 // Usage: node scripts/rainbow-debug.mjs <input.glb> <output.glb> [topN]
 import { NodeIO } from "@gltf-transform/core";
-import { KHRONOS_EXTENSIONS } from "@gltf-transform/extensions";
+import { ALL_EXTENSIONS } from "@gltf-transform/extensions";
+import { MeshoptDecoder, MeshoptEncoder } from "meshoptimizer";
 
 const [input, output, topNArg] = process.argv.slice(2);
 const topN = Number(topNArg) || 16;
-const io = new NodeIO().registerExtensions(KHRONOS_EXTENSIONS);
+await MeshoptDecoder.ready;
+await MeshoptEncoder.ready;
+const io = new NodeIO().registerExtensions(ALL_EXTENSIONS).registerDependencies({
+  "meshopt.decoder": MeshoptDecoder,
+  "meshopt.encoder": MeshoptEncoder,
+});
 const doc = await io.read(input);
 
 // Distinct, saturated, easy-to-name colors

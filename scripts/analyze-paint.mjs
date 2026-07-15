@@ -1,10 +1,15 @@
 // Generic paint-material component analyzer with world transforms.
 // Usage: node analyze-generic.mjs <input.glb> <materialName>
 import { NodeIO } from "@gltf-transform/core";
+import { ALL_EXTENSIONS } from "@gltf-transform/extensions";
 import { weld } from "@gltf-transform/functions";
+import { MeshoptDecoder } from "meshoptimizer";
 
 const [input, matName] = process.argv.slice(2);
-const io = new NodeIO();
+await MeshoptDecoder.ready;
+const io = new NodeIO()
+  .registerExtensions(ALL_EXTENSIONS)
+  .registerDependencies({ "meshopt.decoder": MeshoptDecoder });
 const doc = await io.read(input);
 await doc.transform(weld());
 

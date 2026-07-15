@@ -1,12 +1,31 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import dynamic from "next/dynamic";
 import { useConfiguratorStore } from "@/stores/configurator-store";
 import { MOTORCYCLES } from "@/data/motorcycles";
-import { SceneCanvas } from "./SceneCanvas";
 import { Sidebar, Brand } from "./Sidebar";
 import { ThemeToggle } from "./ThemeToggle";
 import { Toast } from "./Toast";
+
+// three.js + drei + the canvas live in their own async chunk so the page
+// shell paints while they download (in parallel with the preloaded GLB).
+const SceneCanvas = dynamic(
+  () => import("./SceneCanvas").then((m) => m.SceneCanvas),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex h-full items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <div className="h-10 w-10 animate-spin rounded-full border-4 border-line-strong border-t-accent" />
+          <p className="whitespace-nowrap font-mono text-xs tracking-[0.08em] text-dim">
+            LOADING VIEWER...
+          </p>
+        </div>
+      </div>
+    ),
+  }
+);
 
 function BikeChips() {
   const motorcycle = useConfiguratorStore((s) => s.currentMotorcycle);

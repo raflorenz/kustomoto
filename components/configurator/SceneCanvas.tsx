@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useRef } from "react";
+import { Suspense, useEffect, useRef } from "react";
 import * as THREE from "three";
 import { Canvas } from "@react-three/fiber";
 import {
@@ -8,9 +8,11 @@ import {
   Environment,
   Lightformer,
   ContactShadows,
+  useGLTF,
 } from "@react-three/drei";
 import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 import { useConfiguratorStore } from "@/stores/configurator-store";
+import { MOTORCYCLES } from "@/data/motorcycles";
 import { BUILTIN_MODELS } from "./models";
 import { MotorcycleModel } from "./MotorcycleModel";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
@@ -33,7 +35,27 @@ const ZOOM_BUTTON_CLASS =
 export function SceneCanvas() {
   const motorcycle = useConfiguratorStore((s) => s.currentMotorcycle);
   const theme = useConfiguratorStore((s) => s.theme);
+  const modelLoaded = useConfiguratorStore((s) => s.modelLoaded);
   const controlsRef = useRef<OrbitControlsImpl>(null);
+
+  // Once the current bike is on screen, warm the other bikes' GLBs during
+  // idle time so switching is instant. useGLTF.preload dedupes via the
+  // loader cache, so refires after a switch are no-ops.
+  useEffect(() => {
+    if (!modelLoaded) return;
+    const idle =
+      window.requestIdleCallback ??
+      ((cb: () => void) => window.setTimeout(cb, 2500));
+    const cancelIdle = window.cancelIdleCallback ?? window.clearTimeout;
+    const handle = idle(() => {
+      for (const bike of MOTORCYCLES) {
+        if (bike.modelPath && bike.id !== motorcycle?.id) {
+          useGLTF.preload(bike.modelPath);
+        }
+      }
+    });
+    return () => cancelIdle(handle);
+  }, [modelLoaded, motorcycle]);
 
   const colors = SCENE_COLORS[theme];
 
