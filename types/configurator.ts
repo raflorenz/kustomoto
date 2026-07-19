@@ -8,7 +8,13 @@ export interface ColorPreset {
 
 export type PartCategory = "fairing" | "body" | "accent" | "mechanical";
 
-export type FinishId = "gloss" | "matte" | "metallic" | "satin" | "chrome";
+export type FinishId =
+  | "gloss"
+  | "matte"
+  | "metallic"
+  | "satin"
+  | "chrome"
+  | "carbon";
 
 export interface FinishPreset {
   id: FinishId;
@@ -20,6 +26,8 @@ export interface FinishPreset {
   metalness: number;
   clearcoat: number;
   clearcoatRoughness: number;
+  /** Overlay the woven carbon-fiber texture, tinted by the part color */
+  weave?: boolean;
 }
 
 export interface PartConfig {

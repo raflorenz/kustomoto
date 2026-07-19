@@ -6,6 +6,115 @@ import type {
   MaterialOverride,
 } from "@/types/configurator";
 
+let carbonWeaveTexture: THREE.Texture | null = null;
+
+/**
+ * Lazily build a tileable 2/2-twill carbon weave as a grayscale canvas
+ * texture — grayscale so material.color tints it (black carbon, colored
+ * weave, etc.). Shared by every part that uses the carbon finish.
+ */
+function getCarbonWeaveTexture(): THREE.Texture | null {
+  if (carbonWeaveTexture) return carbonWeaveTexture;
+  if (typeof document === "undefined") return null;
+
+  const cells = 16;
+  const cell = 16;
+  const canvas = document.createElement("canvas");
+  canvas.width = canvas.height = cells * cell;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return null;
+
+  for (let j = 0; j < cells; j++) {
+    for (let i = 0; i < cells; i++) {
+      const x = i * cell;
+      const y = j * cell;
+      // 2/2 twill: tow orientation alternates in offset pairs, which is
+      // what produces the diagonal banding carbon is known for
+      const horizontal = (i + j) % 4 < 2;
+      const grad = horizontal
+        ? ctx.createLinearGradient(x, y, x, y + cell)
+        : ctx.createLinearGradient(x, y, x + cell, y);
+      // Perpendicular tows catch light differently; keep the two
+      // orientations at distinct brightness so the weave reads at a glance
+      const [edge, mid] = horizontal
+        ? ["#55595d", "#d9dde0"]
+        : ["#37393c", "#9b9fa3"];
+      grad.addColorStop(0, edge);
+      grad.addColorStop(0.5, mid);
+      grad.addColorStop(1, edge);
+      ctx.fillStyle = grad;
+      ctx.fillRect(x, y, cell, cell);
+
+      // Fine striations along each tow's fiber direction
+      ctx.strokeStyle = "rgba(0,0,0,0.16)";
+      ctx.lineWidth = 1;
+      for (let s = 2; s < cell; s += 4) {
+        ctx.beginPath();
+        if (horizontal) {
+          ctx.moveTo(x, y + s + 0.5);
+          ctx.lineTo(x + cell, y + s + 0.5);
+        } else {
+          ctx.moveTo(x + s + 0.5, y);
+          ctx.lineTo(x + s + 0.5, y + cell);
+        }
+        ctx.stroke();
+      }
+    }
+  }
+
+  carbonWeaveTexture = new THREE.CanvasTexture(canvas);
+  carbonWeaveTexture.wrapS = THREE.RepeatWrapping;
+  carbonWeaveTexture.wrapT = THREE.RepeatWrapping;
+  carbonWeaveTexture.repeat.set(4, 4);
+  carbonWeaveTexture.colorSpace = THREE.SRGBColorSpace;
+  carbonWeaveTexture.anisotropy = 8;
+  return carbonWeaveTexture;
+}
+
+/**
+ * SketchUp-derived GLBs ship their paint meshes without UVs, so a texture
+ * map has nothing to sample. Box-project UVs from world-scaled positions
+ * (dominant normal axis picks the plane); density is tuned so one weave
+ * tow lands around 5 mm on the real-size bike regardless of model units.
+ */
+function ensureWeaveUvs(mesh: THREE.Mesh): boolean {
+  const geometry = mesh.geometry as THREE.BufferGeometry | undefined;
+  const position = geometry?.attributes?.position;
+  if (!geometry || !position) return false;
+  if (geometry.attributes.uv) return true;
+
+  if (!geometry.attributes.normal) geometry.computeVertexNormals();
+  const normal = geometry.attributes.normal;
+  const scale = mesh.getWorldScale(new THREE.Vector3());
+  const density = 3.1; // texture tiles per meter (× texture.repeat)
+
+  const uv = new Float32Array(position.count * 2);
+  for (let i = 0; i < position.count; i++) {
+    const x = position.getX(i) * scale.x;
+    const y = position.getY(i) * scale.y;
+    const z = position.getZ(i) * scale.z;
+    const nx = Math.abs(normal.getX(i));
+    const ny = Math.abs(normal.getY(i));
+    const nz = Math.abs(normal.getZ(i));
+    let u: number;
+    let v: number;
+    if (nx >= ny && nx >= nz) {
+      u = y;
+      v = z;
+    } else if (ny >= nx && ny >= nz) {
+      u = x;
+      v = z;
+    } else {
+      u = x;
+      v = y;
+    }
+    uv[i * 2] = u * density;
+    uv[i * 2 + 1] = v * density;
+  }
+  geometry.setAttribute("uv", new THREE.BufferAttribute(uv, 2));
+  return true;
+}
+
 export function buildMeshMap(
   scene: THREE.Group | THREE.Object3D
 ): Map<string, THREE.Mesh> {
@@ -51,6 +160,29 @@ export function applyCustomizationToMesh(
     if ("clearcoat" in phys) {
       phys.clearcoat = finish.clearcoat;
       phys.clearcoatRoughness = finish.clearcoatRoughness;
+    }
+
+    if ("map" in std) {
+      if (finish.weave && ensureWeaveUvs(mesh)) {
+        // Stash any authored maps so other finishes can restore them
+        if (std.userData.preWeaveMap === undefined) {
+          std.userData.preWeaveMap = std.map;
+          std.userData.preWeaveBumpMap = std.bumpMap;
+        }
+        const weave = getCarbonWeaveTexture();
+        if (std.map !== weave) {
+          std.map = weave;
+          std.bumpMap = weave;
+          std.bumpScale = 0.35;
+          std.needsUpdate = true;
+        }
+      } else if (std.userData.preWeaveMap !== undefined) {
+        std.map = std.userData.preWeaveMap;
+        std.bumpMap = std.userData.preWeaveBumpMap;
+        delete std.userData.preWeaveMap;
+        delete std.userData.preWeaveBumpMap;
+        std.needsUpdate = true;
+      }
     }
   }
 

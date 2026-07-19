@@ -62,6 +62,17 @@ export const FINISHES: Record<FinishId, FinishPreset> = {
     clearcoat: 0,
     clearcoatRoughness: 0,
   },
+  carbon: {
+    id: "carbon",
+    name: "Carbon Fiber",
+    description: "Woven twill weave under clearcoat",
+    price: 2500,
+    roughness: 0.25,
+    metalness: 0.2,
+    clearcoat: 1,
+    clearcoatRoughness: 0.1,
+    weave: true,
+  },
 };
 
 export const FINISH_LIST: FinishPreset[] = Object.values(FINISHES);

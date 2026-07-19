@@ -18,6 +18,8 @@ const FINISH_SWATCH: Record<FinishId, string> = {
   satin: "linear-gradient(135deg, #9aa1ab 0%, #6b7280 55%, #848b95 100%)",
   chrome:
     "linear-gradient(160deg, #ffffff 0%, #c9ced6 30%, #5d6570 50%, #e5e8ec 70%, #8b929c 100%)",
+  carbon:
+    "repeating-conic-gradient(#3d4249 0% 25%, #14161a 25% 50%) 0 0 / 6px 6px",
 };
 
 export function FinishPicker({ value, onChange }: FinishPickerProps) {
